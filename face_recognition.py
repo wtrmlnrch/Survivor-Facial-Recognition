@@ -1,5 +1,10 @@
 # face_recognition.py
 """Project Description
+Name: HW 1 Face Recognition
+Authors: Sarte & Sustaita
+Professor: Dr. Eicholtz
+Class: AI 3 - csc4510
+Due Date: 9/25/2024
 
 This project will work to build a PCA with k-means clustering to predict how compeitors wil perform in 
 the game survivor based on a face-recogniton model. Who's face is most similar to a survivor host and 
@@ -12,7 +17,6 @@ analysis (PCA) and k-means clustering along with supervised learning methods suc
 and neural networks to explore an image dataset related to the reality TV show _Survivor_.
 
 """
-# Add some comments here about what the code does.
 # raghr
 
 import argparse
