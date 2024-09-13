@@ -23,7 +23,10 @@ import argparse
 import os
 import pdb
 
-ROOT = os.path.dirname(os.path.abspath(__file__)) # path to source directory of this file
+ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
+HEIGHT = 256
+WIDTH = 256
 
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
@@ -31,6 +34,11 @@ parser.add_argument('--debug', help='use pdb to look into code before exiting pr
 def main(args):
 	if args.debug:
 		pdb.set_trace()
+	#Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
+	# while maintaining at least 90% of the original variance. You are encouraged to use the
+	#  [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
+	# in the scikit-learn library.
+
 
 if __name__ == "__main__":
 	main(parser.parse_args())
