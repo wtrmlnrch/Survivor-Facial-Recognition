@@ -29,6 +29,8 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 import sys
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
@@ -59,7 +61,7 @@ def main(args):
 	# starting pca (:
 	print(prof_labels)
 	print(surv_labels)
-     
+	prof = np.where(prof_labels == 'Hoan_Ngo')[0][0]
 	# Compute the average survivor
 	mu = np.mean(surv_data, axis=1)
 
@@ -96,18 +98,53 @@ def main(args):
 	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
 
 	# Select the top eigenvectors
-	E = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
+	E = [:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
 
-	# Project data samples into "face space"
+	# Project dtop_eigfacesata samples into "face space"
 	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigenfaces, n_samples)
      
 	# weights
 	weights = E.T @ A
+	scaler = StandardScaler()
+	X_scaled = scaler.fit_transform(surv_data)
 
+
+	pca = PCA(n_components=num_eigfaces)
+	principalComponents = pca.fit_transform(X_scaled)
 	print(f"Number of eigenfaces to keep: {num_eigfaces}")
 	print("Projected data shape:", projected_data.shape)
+	plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c= prof.target, cmap='viridis')
+	plt.colorbar()
+	plt.xlabel('Principal Component 1')
+	plt.ylabel('Principal Component 2')
+	plt.show()
 	print(f'{weights.shape}')
+	# reconstructed_images = []
+      
+	# for prof in prof_labels:
+	# 	reconstructed_images = []
+	# 	this_prof = np.where(prof_labels == prof)[0][0]
 
+	# 	# Use only the first `num_weights` components
+	# 	weights_subset = weights[:num_eigfaces]
+	# 	eigfaces_subset = top_eigfaces[:, :num_eigfaces]
+
+	# 	# Reconstruct the image
+	# 	reconstructed_face = np.dot(eigfaces_subset, weights_subset) + mu
+
+	# 	# Reshape and add to the list of images
+	# 	reconstructed_face_image = reconstructed_face.reshape(HEIGHT, WIDTH)
+	# 	reconstructed_images.append(reconstructed_face_image)
+
+	# 	# Plotting the montage
+	# 	fig, axes = plt.subplots(1, len(num_eigfaces), figsize=(15, 5))
+
+	# 	for ax, num_weights, img in zip(axes, num_eigfaces, reconstructed_images):
+	# 		ax.imshow(img, cmap='gray')
+	# 		ax.set_title(f'{num_weights} PCs')
+	# 		ax.axis('off')
+
+	# plt.show()
 
 
 def load(directory=DATADIR):
