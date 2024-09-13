@@ -72,6 +72,39 @@ def main(args):
 	plt.colorbar()
 	plt.show()
      
+	# Compute the difference between images and the mean
+	A = surv_data - mu[:, np.newaxis]
+
+	# Compute the covariance matrix
+	S = np.dot(A.T, A) / A.shape[1]
+
+	# Solve the eigenvalue problem 
+	eigvalues, eigfaces = np.linalg.eig(S)  # eigdonuts: (n_samples, n_samples)
+
+	# Sort eigenvalues and corresponding eigenvectors
+	sorted_indices = np.argsort(eigvalues)[::-1]
+	eigvalues = eigvalues[sorted_indices]
+	eigfaces = eigfaces[:, sorted_indices]
+
+	# Compute eigenvectors in the original feature space
+	top_eigfaces = np.dot(A, eigfaces)  # Transform eigenvectors
+
+	# Determine how many eigenvectors to keep 
+	total_variance = np.sum(eigvalues)
+	cumulative_variance = np.cumsum(eigvalues) / total_variance
+	variance_threshold = 0.80  # 90% variance
+	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
+
+	# Select the top eigenvectors
+	top_eigfaces = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigendonuts)
+
+	# Project data samples into "donut space"
+	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigendonuts, n_samples)
+
+	print(f"Number of eigendonuts to keep: {num_eigfaces}")
+	print("Projected data shape:", projected_data.shape)
+
+
 
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
