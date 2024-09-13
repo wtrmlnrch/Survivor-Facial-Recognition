@@ -34,10 +34,10 @@ ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
 DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
-Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'professors')
-Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'survivor')
-HEIGHT = 726
-WIDTH = 726
+Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
+Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
+HEIGHT = 70
+WIDTH = 70
 
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
