@@ -96,13 +96,17 @@ def main(args):
 	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
 
 	# Select the top eigenvectors
-	top_eigfaces = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
+	E = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
 
 	# Project data samples into "face space"
 	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigenfaces, n_samples)
+     
+	# weights
+	weights = E.T @ A
 
 	print(f"Number of eigenfaces to keep: {num_eigfaces}")
 	print("Projected data shape:", projected_data.shape)
+	print(f'{weights.shape}')
 
 
 
