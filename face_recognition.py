@@ -48,6 +48,7 @@ def main(args):
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
 	#  [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
 	# in the scikit-learn library.
+     
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
     files = os.listdir(directory)  # extract filenames
