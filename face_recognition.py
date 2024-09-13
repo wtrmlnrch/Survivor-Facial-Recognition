@@ -31,7 +31,9 @@ import sys
 from sklearn.preprocessing import normalize
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
+# AI3_FALL2024
+# FloridaSouthernCS
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
 HEIGHT = 256
 WIDTH = 256
 
