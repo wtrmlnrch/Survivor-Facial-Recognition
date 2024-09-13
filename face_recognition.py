@@ -32,6 +32,9 @@ parser = argparse.ArgumentParser(description="Apply unsupervised learning method
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
 
 def main(args):
+
+	# load data from a directory 
+	data, labels = load(DATADIR)
 	if args.debug:
 		pdb.set_trace()
 	#Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
