@@ -61,7 +61,7 @@ def main(args):
 	# starting pca (:
 	print(prof_labels)
 	print(surv_labels)
-	prof = np.where(prof_labels == 'Hoan_Ngo')[0][0]
+	prof = np.where(prof_labels == 'Ngo')[0][0]
 	# Compute the average survivor
 	mu = np.mean(surv_data, axis=1)
 
@@ -76,6 +76,7 @@ def main(args):
      
 	# Compute the difference between images and the mean
 	A = surv_data - mu[:, np.newaxis]
+	print(surv_data.shape)
 
 	# Compute the covariance matrix
 	S = np.dot(A.T, A) / A.shape[1]
@@ -98,7 +99,8 @@ def main(args):
 	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
 
 	# Select the top eigenvectors
-	E = [:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
+	E = eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
+	print(E.shape, A.shape)
 
 	# Project dtop_eigfacesata samples into "face space"
 	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigenfaces, n_samples)
