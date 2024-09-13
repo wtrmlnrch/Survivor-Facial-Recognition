@@ -79,7 +79,7 @@ def main(args):
 	S = np.dot(A.T, A) / A.shape[1]
 
 	# Solve the eigenvalue problem 
-	eigvalues, eigfaces = np.linalg.eig(S)  # eigdonuts: (n_samples, n_samples)
+	eigvalues, eigfaces = np.linalg.eig(S)  # eigfaces: (n_samples, n_samples)
 
 	# Sort eigenvalues and corresponding eigenvectors
 	sorted_indices = np.argsort(eigvalues)[::-1]
@@ -92,16 +92,16 @@ def main(args):
 	# Determine how many eigenvectors to keep 
 	total_variance = np.sum(eigvalues)
 	cumulative_variance = np.cumsum(eigvalues) / total_variance
-	variance_threshold = 0.80  # 90% variance
+	variance_threshold = 0.90  # 90% variance
 	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
 
 	# Select the top eigenvectors
-	top_eigfaces = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigendonuts)
+	top_eigfaces = top_eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
 
-	# Project data samples into "donut space"
-	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigendonuts, n_samples)
+	# Project data samples into "face space"
+	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigenfaces, n_samples)
 
-	print(f"Number of eigendonuts to keep: {num_eigfaces}")
+	print(f"Number of eigenfaces to keep: {num_eigfaces}")
 	print("Projected data shape:", projected_data.shape)
 
 
