@@ -72,22 +72,20 @@ def main(args):
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
 	plt.show()
 	pdb.set_trace()
+          
+	# Reconstruct each professor's face
+	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T))
 
-	scaler = StandardScaler()
-	X_scaled = scaler.fit_transform(surv_data)
-    
-	label_encoder = LabelEncoder()
-	plt.scatter(surve_proj[:,0], surve_proj[:,1], c=label_encoder.fit_transform(surv_labels)) 
-	plt.colorbar()
-	plt.show()
-     
-	plt.figure(figsize=(8,8)) 
-	fig = plt.figure(figsize=(8,8))
-	fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05) # plot the faces, each image is 64 by 64 pixels 
-	for i in range(len(surv_labels)): 
-		ax = fig.add_subplot(5, 5, i+1, xticks=[], yticks=[])
-		ax.imshow(np.reshape(pca.components_[i,:], (64,64)), cmap=plt.cm.bone, interpolation='nearest') 
-      
+	# Transpose back to original shape (839, 4900)
+	reconstructed_faces = reconstructed_faces.T
+   
+	for img in reconstructed_faces:
+		plt.figure(figsize=(8,4))
+		plt.subplot(1,1,1)
+		plt.imshow(img, cmap='gray')
+		plt.show()
+		pdb.set_trace()
+		
 	# for prof in prof_labels:
 	# 	reconstructed_images = []
 	# 	this_prof = np.where(prof_labels == prof)[0][0]
