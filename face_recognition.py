@@ -72,16 +72,21 @@ def main(args):
 	plt.subplot(1,1,1)
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
 	plt.show()
+     
+	# 2. Which professor looks least like a face according to the underlying facial features in the 
+	# Survivor dataset?_ To answer this question, reconstruct each professor's face using the limited 
+	# number of principal components from (1), then compute the Euclidean distance from the
+    # reconstructed face to the original. Largest distance indicates least likely to be a "face".
           
 	# Reconstruct each professor's face
-	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)).reshape(5,70,70)
-	pdb.set_trace()
-	prof_montage = montage(reconstructed_faces, grid_shape=(1,5))
-	plt.imshow(prof_montage, cmap='gray')
-	plt.axis('off')
-	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
-	plt.show()
-	pdb.set_trace()
+	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)) #.reshape(5,70,70)
+	#pdb.set_trace()
+	#prof_montage = montage(reconstructed_faces, grid_shape=(1,5))
+	# plt.imshow(prof_montage, cmap='gray')
+	# plt.axis('off')
+	# plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
+	# plt.show()
+	# pdb.set_trace()
 
 	# Transpose back to original shape (839, 4900)
 	for i in range(len(reconstructed_faces)):
@@ -92,32 +97,15 @@ def main(args):
 		plt.show()
 		print(prof_labels[i])
 		#pdb.set_trace()
+          
+	distances = np.linalg.norm(prof_data.T - reconstructed_faces, axis=1)
 
-		
-	# for prof in prof_labels:
-	# 	reconstructed_images = []
-	# 	this_prof = np.where(prof_labels == prof)[0][0]
+	# Find the professor with the largest distance
+	least_face_index = np.argmax(distances)
+	least_face_distance = distances[least_face_index]
 
-	# 	# Use only the first `num_weights` components
-	# 	weights_subset = weights[:num_eigfaces]
-	# 	eigfaces_subset = top_eigfaces[:, :num_eigfaces]
+	print(f"Professor {prof_labels[least_face_index]} looks least like a face on survivor with a distance of {least_face_distance}")
 
-	# 	# Reconstruct the image
-	# 	reconstructed_face = np.dot(eigfaces_subset, weights_subset) + mu
-
-	# 	# Reshape and add to the list of images
-	# 	reconstructed_face_image = reconstructed_face.reshape(HEIGHT, WIDTH)
-	# 	reconstructed_images.append(reconstructed_face_image)
-
-	# 	# Plotting the montage
-	# 	fig, axes = plt.subplots(1, len(num_eigfaces), figsize=(15, 5))
-
-	# 	for ax, num_weights, img in zip(axes, num_eigfaces, reconstructed_images):
-	# 		ax.imshow(img, cmap='gray')
-	# 		ax.set_title(f'{num_weights} PCs')
-	# 		ax.axis('off')
-
-	# plt.show()
 
 
 def load(directory=DATADIR):
