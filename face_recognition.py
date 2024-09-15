@@ -33,11 +33,12 @@ from sklearn.preprocessing import normalize
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
 Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
@@ -89,7 +90,7 @@ def main(args):
 	plt.axis('off')
 	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
 	plt.show()
-	pdb.set_trace()
+	#pdb.set_trace()
           
 	distances = np.linalg.norm(prof_data.T - reconstructed_faces, axis=1)
 
@@ -99,7 +100,36 @@ def main(args):
 
 	print(f"Professor {prof_labels[least_face_index]} looks least like a face on survivor with a distance of {least_face_distance}")
 
+	# 3. _Which professor is most likely to be the next host of Survivor?_ 
+	# To answer this question, project each professor into the reduced "Survivor face space"
+	#  and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
+     
+	#Make NN only trained on Jeff Probst
+    
+	# #find index with jeff probst
+	# model = KNeighborsClassifier(2)
+	# model.fit(pca.transform(surv_data.T), surv_labels)
 
+	# predict = model.predict(pca.transform(prof_data.T))
+	# print(predict)
+
+	#model = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(surv_data[jeff_idx])
+	pca.fit(prof_data.T)
+	together = np.concatenate((surv_data, prof_data), axis = 0)
+	together_labels = np.concatenate((surv_labels,prof_labels), axis = 0)
+	pdb.set_trace()
+	X_pca = pca.transform(together.T)
+	nn = NearestNeighbors(n_neighbors=20)
+	nn.fit(X_pca)
+	# Find the nearest neighbor for a specific image
+	image_index = 0  # Index of the image you want to find the nearest neighbor for
+	image_pca = X_pca[image_index].reshape(1, -1)
+	distances, indices = nn.kneighbors(image_pca)
+
+	# Get the index of the closest image
+	closest_image_index = indices[0][0]
+
+	print(f'The closest image to image {together_labels[image_index]} is image {together_labels[closest_image_index]}')
 
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
