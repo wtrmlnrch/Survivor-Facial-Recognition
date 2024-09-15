@@ -26,6 +26,7 @@ from matplotlib.image import imread
 import numpy as np
 import pdb
 from skimage.color import rgb2gray
+from skimage.util import montage
 import matplotlib.pyplot as plt
 import sys
 from sklearn.preprocessing import normalize
@@ -71,20 +72,27 @@ def main(args):
 	plt.subplot(1,1,1)
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
 	plt.show()
-	pdb.set_trace()
           
 	# Reconstruct each professor's face
-	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T))
+	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)).reshape(5,70,70)
+	pdb.set_trace()
+	prof_montage = montage(reconstructed_faces, grid_shape=(1,5))
+	plt.imshow(prof_montage, cmap='gray')
+	plt.axis('off')
+	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
+	plt.show()
+	pdb.set_trace()
 
 	# Transpose back to original shape (839, 4900)
-	reconstructed_faces = reconstructed_faces.T
-   
-	for img in reconstructed_faces:
+	for i in range(len(reconstructed_faces)):
+		img = reconstructed_faces[i].reshape((70,70))
 		plt.figure(figsize=(8,4))
 		plt.subplot(1,1,1)
 		plt.imshow(img, cmap='gray')
 		plt.show()
-		pdb.set_trace()
+		print(prof_labels[i])
+		#pdb.set_trace()
+
 		
 	# for prof in prof_labels:
 	# 	reconstructed_images = []
