@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import sys
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
 from sklearn.decomposition import PCA
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
@@ -57,14 +58,27 @@ def main(args):
 	# load data from a directory 
 	prof_data, prof_labels = load(Prof_DataDir)
 	surv_data, surv_labels = load(Surv_DataDir)
-	pca = PCA(0.90) 
-	surve_proj = pca.fit_transform(surv_data)
-	print(pca)
+	
+	mean_face = np.mean(surv_data, axis=1)
+	pca = PCA(0.9)
+	surve_proj = pca.fit(surv_data.T)
+	mean_face_pca = pca.inverse_transform(pca.transform([mean_face]))
+     
+	#pdb.set_trace()
+	mean_image_reshaped_PCA = mean_face_pca.reshape((70,70))
+
+	plt.figure(figsize=(8,4))
+	plt.subplot(1,1,1)
+	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
+	plt.show()
+	pdb.set_trace()
 
 	scaler = StandardScaler()
 	X_scaled = scaler.fit_transform(surv_data)
-     
-	plt.scatter(surve_proj[:,0], surve_proj[:,1],c=surv_labels) 
+    
+	label_encoder = LabelEncoder()
+	plt.scatter(surve_proj[:,0], surve_proj[:,1], c=label_encoder.fit_transform(surv_labels)) 
+	plt.colorbar()
 	plt.show()
      
 	plt.figure(figsize=(8,8)) 
