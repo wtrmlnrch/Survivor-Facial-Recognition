@@ -81,22 +81,15 @@ def main(args):
 	# Reconstruct each professor's face
 	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)) #.reshape(5,70,70)
 	#pdb.set_trace()
-	#prof_montage = montage(reconstructed_faces, grid_shape=(1,5))
-	# plt.imshow(prof_montage, cmap='gray')
-	# plt.axis('off')
-	# plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
-	# plt.show()
-	# pdb.set_trace()
-
-	# Transpose back to original shape (839, 4900)
-	for i in range(len(reconstructed_faces)):
-		img = reconstructed_faces[i].reshape((70,70))
-		plt.figure(figsize=(8,4))
-		plt.subplot(1,1,1)
-		plt.imshow(img, cmap='gray')
-		plt.show()
-		print(prof_labels[i])
-		#pdb.set_trace()
+     
+	# montage code
+	montage_profs = reconstructed_faces.reshape(5,70,70)
+	prof_montage = montage(montage_profs, grid_shape=(1,5))
+	plt.imshow(prof_montage, cmap='gray')
+	plt.axis('off')
+	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
+	plt.show()
+	pdb.set_trace()
           
 	distances = np.linalg.norm(prof_data.T - reconstructed_faces, axis=1)
 
