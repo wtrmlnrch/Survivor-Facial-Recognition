@@ -57,71 +57,22 @@ def main(args):
 	# load data from a directory 
 	prof_data, prof_labels = load(Prof_DataDir)
 	surv_data, surv_labels = load(Surv_DataDir)
-     
-	# starting pca (:
-	print(prof_labels)
-	print(surv_labels)
-	prof = np.where(prof_labels == 'Ngo')[0][0]
-	# Compute the average survivor
-	mu = np.mean(surv_data, axis=1)
+	pca = PCA(0.90) 
+	surve_proj = pca.fit_transform(surv_data)
+	print(pca)
 
-    # Reshape the average survivor to 2D
-	mu_image = mu.reshape(HEIGHT, WIDTH)
-
-    # Visualize the average survivor face
-	plt.imshow(mu_image, cmap='gray')
-	plt.title('Average Survivor')
-	plt.colorbar()
-	plt.show()
-     
-	# Compute the difference between images and the mean
-	A = surv_data - mu[:, np.newaxis]
-	print(surv_data.shape)
-
-	# Compute the covariance matrix
-	S = np.dot(A.T, A) / A.shape[1]
-
-	# Solve the eigenvalue problem 
-	eigvalues, eigfaces = np.linalg.eig(S)  # eigfaces: (n_samples, n_samples)
-
-	# Sort eigenvalues and corresponding eigenvectors
-	sorted_indices = np.argsort(eigvalues)[::-1]
-	eigvalues = eigvalues[sorted_indices]
-	eigfaces = eigfaces[:, sorted_indices]
-
-	# Compute eigenvectors in the original feature space
-	top_eigfaces = np.dot(A, eigfaces)  # Transform eigenvectors
-
-	# Determine how many eigenvectors to keep 
-	total_variance = np.sum(eigvalues)
-	cumulative_variance = np.cumsum(eigvalues) / total_variance
-	variance_threshold = 0.90  # 90% variance
-	num_eigfaces = np.searchsorted(cumulative_variance, variance_threshold) + 1
-
-	# Select the top eigenvectors
-	E = eigfaces[:, :num_eigfaces]  # Shape: (n_features, num_eigenfaces)
-	print(E.shape, A.shape)
-
-	# Project dtop_eigfacesata samples into "face space"
-	projected_data = np.dot(top_eigfaces.T, A)  # Shape: (num_eigenfaces, n_samples)
-     
-	# weights
-	weights = E.T @ A
 	scaler = StandardScaler()
 	X_scaled = scaler.fit_transform(surv_data)
-
-
-	pca = PCA(n_components=num_eigfaces)
-	principalComponents = pca.fit_transform(X_scaled)
-	print(f"Number of eigenfaces to keep: {num_eigfaces}")
-	print("Projected data shape:", projected_data.shape)
-	plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c= prof.target, cmap='viridis')
-	plt.colorbar()
-	plt.xlabel('Principal Component 1')
-	plt.ylabel('Principal Component 2')
+     
+	plt.scatter(surve_proj[:,0], surve_proj[:,1],c=surv_labels) 
 	plt.show()
-	print(f'{weights.shape}')
-	# reconstructed_images = []
+     
+	plt.figure(figsize=(8,8)) 
+	fig = plt.figure(figsize=(8,8))
+	fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05) # plot the faces, each image is 64 by 64 pixels 
+	for i in range(len(surv_labels)): 
+		ax = fig.add_subplot(5, 5, i+1, xticks=[], yticks=[])
+		ax.imshow(np.reshape(pca.components_[i,:], (64,64)), cmap=plt.cm.bone, interpolation='nearest') 
       
 	# for prof in prof_labels:
 	# 	reconstructed_images = []
