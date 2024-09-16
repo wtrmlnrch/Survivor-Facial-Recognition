@@ -98,39 +98,30 @@ def main(args):
 	least_face_index = np.argmax(distances)
 	least_face_distance = distances[least_face_index]
 
-	print(f"Professor {prof_labels[least_face_index]} looks least like a face on survivor with a distance of {least_face_distance}")
+	print(f"Professor {prof_labels[least_face_index]} looks least like a survivor contestant. Distance: {least_face_distance}")
 
 	# 3. _Which professor is most likely to be the next host of Survivor?_ 
 	# To answer this question, project each professor into the reduced "Survivor face space"
 	#  and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
      
 	#Make NN only trained on Jeff Probst
-    
-	# #find index with jeff probst
-	# model = KNeighborsClassifier(2)
-	# model.fit(pca.transform(surv_data.T), surv_labels)
+    # Project each professor into the reduced "Survivor face space"
+	prof_data_pca = pca.transform(prof_data.T)
 
-	# predict = model.predict(pca.transform(prof_data.T))
-	# print(predict)
+	# Assuming we know Jeff Probst's index, find his PCA vector
+	jeff_idx = np.where(surv_labels == 'Probst')[0][0]  # Replace with actual label
+	jeff_pca = pca.transform(surv_data[:, jeff_idx].reshape(1, -1))
 
-	#model = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(surv_data[jeff_idx])
-	pca.fit(prof_data.T)
-	together = np.concatenate((surv_data, prof_data), axis = 0)
-	together_labels = np.concatenate((surv_labels,prof_labels), axis = 0)
-	pdb.set_trace()
-	X_pca = pca.transform(together.T)
-	nn = NearestNeighbors(n_neighbors=20)
-	nn.fit(X_pca)
-	# Find the nearest neighbor for a specific image
-	image_index = 0  # Index of the image you want to find the nearest neighbor for
-	image_pca = X_pca[image_index].reshape(1, -1)
-	distances, indices = nn.kneighbors(image_pca)
+	# Apply Nearest Neighbor classification
+	nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree')
+	nn.fit(prof_data_pca)
+	distances, spots = nn.kneighbors(jeff_pca)
 
-	# Get the index of the closest image
-	closest_image_index = indices[0][0]
-
-	print(f'The closest image to image {together_labels[image_index]} is image {together_labels[closest_image_index]}')
-
+	# Find and print the most similar professor
+	jeff_professor_idx = spots[0][0]
+	print(f"The professor with the highest chance of hosting survivor is: {prof_labels[jeff_professor_idx]}")
+	print(f"Distance to Jeff: {distances[0][0]}")
+     
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
     files = os.listdir(directory)  # extract filenames
