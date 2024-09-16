@@ -41,7 +41,7 @@ from scipy import stats
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
 Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
@@ -200,7 +200,37 @@ def main(args):
     # Print professor assignments to clusters
 	print("Professor assignments to clusters/seasons:")
 	for i, label in enumerate(prof_clusters):
-		print(f"Professor {prof_labels[i]} is closest to season {common_labels[i]}")
+		print(f"Professor {prof_labels[i]} is closest to Season {common_labels[i]}.")
+            
+	# 5. Which professor is most likely to win Survivor? Be creative! You must justify your answer 
+	# to this question in a quantitative way using the results of PCA on the Survivor dataset.
+
+	winners = ['Hatch', 'Wesson', 'Zohn', 'Towery', "Heidik", "Morasca", 
+	"Diaz-Twine", "Brkich", "Daugherty", "Westman", "Boatwright", 
+	"Baskauskas", "Kwon", "Cole", "Herzog", "Shallow", "Crowley", 
+	"Thomas", "White", "Diaz-Twine", "Birza", "Mariano", "Clarke", 
+	"Spradlin", "Stapley", "Cochran", "Apostol", "Vlachos", 'Anderson', 
+	"Holloway", "Collins", "Fitzgerald", "Klein", "Lacina", "Driebergen",
+	"Holland", 'Wilson', 'Underwood', 'Sheehan', "Vlachos",
+	"Casupanan", "Oketch", "Gabler", "Arocho", "Valladares", "Petty"]
+
+	winner_idxs = []
+
+	for name in winners:
+		idxs = np.where(surv_labels == name)
+		for ids in idxs[0]:
+			winner_idxs.append(ids)
+	winner_idxs = list(set(winner_idxs))
+	winner_idxs.sort()
+
+	winners_data, winners_labels = [0]*len(winner_idxs), [0]*len(winner_idxs)
+
+	for i in range(len(winner_idxs)):
+		winners_data[i], winners_labels[i] = surv_data[winner_idxs[i]], surv_labels[winner_idxs[i]]
+
+	pdb.set_trace()
+
+
 
 
 def load(directory=DATADIR):
