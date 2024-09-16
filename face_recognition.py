@@ -36,11 +36,12 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
 import seaborn as sns
+from scipy import stats
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
 Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
@@ -60,8 +61,10 @@ def main(args):
 	# in the scikit-learn library.
      
 	# load data from a directory 
-	prof_data, prof_labels = load(Prof_DataDir)
-	surv_data, surv_labels = load(Surv_DataDir)
+	prof_data, prof_labels, prof_names= load(Prof_DataDir)
+	surv_data, surv_labels, season_labels = load(Surv_DataDir)
+	season_labels = np.char.replace(season_labels, 'S', '')
+	season_labels = season_labels.astype(int)
 	
 	mean_face = np.mean(surv_data, axis=1)
 	pca = PCA(0.9)
@@ -138,9 +141,7 @@ def main(args):
 		km = KMeans(n_clusters=k, random_state=2)
 		km.fit(surv_pca.T)
 		sse.append(km.inertia_)
-	print(sse)
       
-	  
 	sns.set_style("whitegrid")
 	g=sns.lineplot(x=range(1,46), y=sse)
 
@@ -148,7 +149,12 @@ def main(args):
 		ylabel = "Sum Squared Error", 
 		title ='Elbow Method')
 	plt.show()
-	n_clusters = min(sse)
+
+	slopes = np.gradient(sse)
+	dis_to_one = np.subtract(slopes, -1)
+	most_linear = np.max(dis_to_one)
+	n_clusters = np.where(dis_to_one == most_linear)[0].tolist()[0]
+
 
 	# Apply k-means clustering
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
@@ -172,16 +178,31 @@ def main(args):
 
     # Predict clusters for professors
 	prof_clusters = kmeans.predict(prof_data_pca)
+    
+	# Get cluster assignments
+	cluster_assignments = kmeans.labels_
+
+	# Initialize list to store average labels for each cluster
+	common_labels = []
+      
+	for clusters in prof_clusters:
+		# Find indices of data points in the current cluster
+		indices = np.where(cluster_assignments == clusters)[0]
+		
+		# Extract labels of data points in the current cluster
+		cluster_labels = []
+		for idx in indices:
+			cluster_labels.append(season_labels[idx])
+		# Calculate the most commone label
+		common_label = stats.mode(cluster_labels, keepdims=False)[0]
+		common_labels.append(common_label)
 
     # Print professor assignments to clusters
 	print("Professor assignments to clusters/seasons:")
 	for i, label in enumerate(prof_clusters):
-		print(f"Professor {prof_labels[i]} is closest to {label}")
+		print(f"Professor {prof_labels[i]} is closest to season {common_labels[i]}")
 
-	# Optionally, visualize the clustering results
 
-	
-     
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
     files = os.listdir(directory)  # extract filenames
@@ -217,8 +238,9 @@ def load(directory=DATADIR):
 
     # Extract labels from filenames
     labels = np.array([file.split('_')[-1].split('.')[0] for file in files])
+    season_labels = np.array([file.split('_')[0].split('.')[0] for file in files])
 
-    return data, labels
+    return data, labels, season_labels
 
 if __name__ == "__main__":
 	main(parser.parse_args())
