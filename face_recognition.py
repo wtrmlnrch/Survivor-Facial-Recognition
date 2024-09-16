@@ -34,6 +34,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import KMeans
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
@@ -102,9 +103,9 @@ def main(args):
 
 	# 3. _Which professor is most likely to be the next host of Survivor?_ 
 	# To answer this question, project each professor into the reduced "Survivor face space"
-	#  and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
+	# and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
      
-	#Make NN only trained on Jeff Probst
+	#Make NN only used with on Jeff Probst vector and Professor images
     # Project each professor into the reduced "Survivor face space"
 	prof_data_pca = pca.transform(prof_data.T)
 
@@ -119,8 +120,53 @@ def main(args):
 
 	# Find and print the most similar professor
 	jeff_professor_idx = spots[0][0]
+	print(spots)
 	print(f"The professor with the highest chance of hosting survivor is: {prof_labels[jeff_professor_idx]}")
 	print(f"Distance to Jeff: {distances[0][0]}")
+     
+
+	#4. _Which season would each professor most likely be on?_ To answer this question, use 
+	# **k-means clustering** on the PCA-reduced _Survivor_ faces, then assign each of the PCA-reduced 
+	# professor faces to the nearest cluster. The average season of _Survivor_ castaways in the cluster
+	#  (not including Jeff Probst) is the assigned season for that professor.
+     
+	surv_pca = pca.fit_transform(surv_data.T).T 
+	# Number of clusters (seasons)
+	n_clusters = 46  # Assuming each label represents a season
+
+	# Apply k-means clustering
+	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
+	kmeans.fit(surv_pca.T)  # Transpose to fit (n_samples, n_features)
+
+	# Get cluster labels for each image
+	cluster_labels = kmeans.labels_
+     
+	# Project professor data into the PCA space
+	prof_pca = pca.transform(prof_data.T)
+
+    # Predict clusters for professors
+	prof_clusters = kmeans.predict(prof_data_pca)
+
+    # Print professor assignments to clusters
+	print("Professor assignments to clusters:")
+	for i, label in enumerate(prof_clusters):
+		print(f"Professor {prof_labels[i]} is assigned to cluster {label}")
+
+	# Optionally, visualize the clustering results
+	plot_clustering_results(surv_pca, cluster_labels)
+
+
+def plot_clustering_results(data_pca, cluster_labels):
+	"""Visualize clustering results."""
+	plt.figure(figsize=(10, 7))
+
+	# Scatter plot
+	plt.scatter(data_pca[0, :], data_pca[1, :], c=cluster_labels, cmap='viridis', alpha=0.5)
+	plt.colorbar(label='Cluster Label')
+	plt.xlabel('PC 1')
+	plt.ylabel('PC 2')
+	plt.title('PCA Reduced Data Clustering')
+	plt.show()
      
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
