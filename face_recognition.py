@@ -35,6 +35,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
+import seaborn as sns
 
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
@@ -131,8 +132,23 @@ def main(args):
 	#  (not including Jeff Probst) is the assigned season for that professor.
      
 	surv_pca = pca.fit_transform(surv_data.T).T 
-	# Number of clusters (seasons)
-	n_clusters = 46  # Assuming each label represents a season
+	# Number of clusters 
+	sse = [] #SUM OF SQUARED ERROR
+	for k in range(1,11):
+		km = KMeans(n_clusters=k, random_state=2)
+		km.fit(surv_pca.T)
+		sse.append(km.inertia_)
+	print(sse)
+      
+	  
+	sns.set_style("whitegrid")
+	g=sns.lineplot(x=range(1,11), y=sse)
+
+	g.set(xlabel ="Number of cluster (k)", 
+		ylabel = "Sum Squared Error", 
+		title ='Elbow Method')
+	plt.show()
+	n_clusters = min(sse)
 
 	# Apply k-means clustering
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
