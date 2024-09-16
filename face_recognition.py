@@ -141,6 +141,16 @@ def main(args):
 	# Get cluster labels for each image
 	cluster_labels = kmeans.labels_
      
+	"""Visualize clustering results."""
+	plt.figure(figsize=(10, 7))
+
+	# Scatter plot
+	plt.scatter(surv_pca[0, :], surv_pca[1, :], c=cluster_labels, cmap='viridis', alpha=0.5)
+	plt.colorbar(label='Cluster Label')
+	plt.xlabel('PC 1')
+	plt.ylabel('PC 2')
+	plt.title('PCA Reduced Data Clustering')
+	plt.show()
 	# Project professor data into the PCA space
 	prof_pca = pca.transform(prof_data.T)
 
@@ -148,25 +158,13 @@ def main(args):
 	prof_clusters = kmeans.predict(prof_data_pca)
 
     # Print professor assignments to clusters
-	print("Professor assignments to clusters:")
+	print("Professor assignments to clusters/seasons:")
 	for i, label in enumerate(prof_clusters):
-		print(f"Professor {prof_labels[i]} is assigned to cluster {label}")
+		print(f"Professor {prof_labels[i]} is closest to {label}")
 
 	# Optionally, visualize the clustering results
-	plot_clustering_results(surv_pca, cluster_labels)
 
-
-def plot_clustering_results(data_pca, cluster_labels):
-	"""Visualize clustering results."""
-	plt.figure(figsize=(10, 7))
-
-	# Scatter plot
-	plt.scatter(data_pca[0, :], data_pca[1, :], c=cluster_labels, cmap='viridis', alpha=0.5)
-	plt.colorbar(label='Cluster Label')
-	plt.xlabel('PC 1')
-	plt.ylabel('PC 2')
-	plt.title('PCA Reduced Data Clustering')
-	plt.show()
+	
      
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
