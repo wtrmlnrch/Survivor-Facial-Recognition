@@ -40,7 +40,7 @@ import seaborn as sns
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
 Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
@@ -134,7 +134,7 @@ def main(args):
 	surv_pca = pca.fit_transform(surv_data.T).T 
 	# Number of clusters 
 	sse = [] #SUM OF SQUARED ERROR
-	for k in range(1,11):
+	for k in range(1,46):
 		km = KMeans(n_clusters=k, random_state=2)
 		km.fit(surv_pca.T)
 		sse.append(km.inertia_)
@@ -142,7 +142,7 @@ def main(args):
       
 	  
 	sns.set_style("whitegrid")
-	g=sns.lineplot(x=range(1,11), y=sse)
+	g=sns.lineplot(x=range(1,46), y=sse)
 
 	g.set(xlabel ="Number of cluster (k)", 
 		ylabel = "Sum Squared Error", 
