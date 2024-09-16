@@ -136,7 +136,7 @@ def main(args):
 
 	# Apply k-means clustering
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-	kmeans.fit(surv_pca.T)  # Transpose to fit (n_samples, n_features)
+	kmeans.fit(surv_pca.T) 
 
 	# Get cluster labels for each image
 	cluster_labels = kmeans.labels_
@@ -149,7 +149,7 @@ def main(args):
 	plt.colorbar(label='Cluster Label')
 	plt.xlabel('PC 1')
 	plt.ylabel('PC 2')
-	plt.title('PCA Reduced Data Clustering')
+	plt.title('Reduced Data Clustering of survivor seasons')
 	plt.show()
 	# Project professor data into the PCA space
 	prof_pca = pca.transform(prof_data.T)
