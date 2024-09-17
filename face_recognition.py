@@ -244,8 +244,10 @@ def main(args):
 			if surv_labels[win] != winners[season_labels[win]-1]:
 				np.delete(possible_winners, np.where(possible_winners == win))
 		profs_winners.append(len(np.intersect1d(indices, winner_idxs)))
-
-	#print(f'The professor who is most likely to win Survivor is {}')
+	
+	profs_winners = np.array(profs_winners)
+	winning_profs = np.where(profs_winners == max(profs_winners))
+	print(f'The professor(s) who may be most likely to win Survivor: \n{np.array2string(prof_labels[winning_profs], separator=" | ")}')
 		
 
 	pdb.set_trace()
