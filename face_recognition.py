@@ -205,6 +205,7 @@ def main(args):
 	# 5. Which professor is most likely to win Survivor? Be creative! You must justify your answer 
 	# to this question in a quantitative way using the results of PCA on the Survivor dataset.
 
+	# all the winners of survivor
 	winners = ['Hatch', 'Wesson', 'Zohn', 'Towery', "Heidik", "Morasca", 
 	"Diaz-Twine", "Brkich", "Daugherty", "Westman", "Boatwright", 
 	"Baskauskas", "Kwon", "Cole", "Herzog", "Shallow", "Crowley", 
@@ -216,6 +217,9 @@ def main(args):
 
 	winner_idxs = []
 
+	# winners indexes
+	# doesn't check for possible wrong winners
+	# however removes duplicate indexes of winners
 	for name in winners:
 		idxs = np.where(surv_labels == name)
 		for ids in idxs[0]:
@@ -223,8 +227,8 @@ def main(args):
 	winner_idxs = list(set(winner_idxs))
 	winner_idxs.sort()
 
+	# creates the winners data and label sets based off of surv_data and surv_labels
 	winners_data, winners_labels = [0]*len(winner_idxs), [0]*len(winner_idxs)
-
 	for i in range(len(winner_idxs)):
 		winners_data[i], winners_labels[i] = surv_data[winner_idxs[i]], surv_labels[winner_idxs[i]]
 
