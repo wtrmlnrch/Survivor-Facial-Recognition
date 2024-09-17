@@ -248,7 +248,9 @@ def main(args):
 	profs_winners = np.array(profs_winners)
 	winning_profs = np.where(profs_winners == max(profs_winners))
 	print(f'The professor(s) who may be most likely to win Survivor: \n{np.array2string(prof_labels[winning_profs], separator=" | ")}')
-		
+	
+
+	# possibly do nearest neighbor to find the professor most likely to win
 
 	pdb.set_trace()
 
