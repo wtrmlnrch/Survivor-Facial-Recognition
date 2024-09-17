@@ -251,25 +251,36 @@ def main(args):
 				np.delete(possible_winners, np.where(possible_winners == win))
 		profs_winners.append(len(np.intersect1d(indices, winner_idxs)))
 	
+	# gets the possible multiple professors who may be the winner
 	profs_winners = np.array(profs_winners)
 	winning_profs = np.where(profs_winners == max(profs_winners))
 	print(f'The professor(s) who may be most likely to win Survivor: \n{np.array2string(prof_labels[winning_profs], separator=" | ")}')
 	
-	# find the mean winner face
-	mean_winner = np.mean(winners_data.T, axis=1)
-	pca = PCA(0.9)
-	pca.fit(winners_data)
-	mean_winner_pca = pca.inverse_transform(pca.transform([mean_winner]))
-     
-	#pdb.set_trace()
-	mean_winner_reshaped_PCA = mean_winner_pca.reshape((70,70))
+	if len(winning_profs[0]) > 1:
+		# find the mean winner face
+		mean_winner = np.mean(winners_data.T, axis=1)
+		pca = PCA(0.9)
+		pca.fit(winners_data)
+		mean_winner_pca = pca.inverse_transform(pca.transform([mean_winner]))
+		
+		#pdb.set_trace()
+		mean_winner_reshaped_PCA = mean_winner_pca.reshape((70,70))
 
-	# plotting the image
-	plt.rcdefaults()
-	plt.figure(figsize=(8,4))
-	plt.subplot(1,1,1)
-	plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
-	plt.show()
+		# plotting the image
+		plt.rcdefaults()
+		plt.figure(figsize=(8,4))
+		plt.subplot(1,1,1)
+		plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
+		plt.show()
+
+		# calculate the euclidean distances between each professors face and the mean winners face
+		distances = []
+		for prof in prof_data.T:
+			distances.append(np.linalg.norm(mean_winner - prof))
+
+		# get the least out of our two already winning professors to find the one closest to the mean winners face
+		prof_winner_idx = np.where(distances == min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]))[0][0]
+		print(f"The professor who is most likely to win Survivor based on the closest Euclidean distance between their face \nand the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
 
 	pdb.set_trace()
 
