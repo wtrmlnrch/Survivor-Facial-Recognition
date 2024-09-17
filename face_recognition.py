@@ -193,7 +193,7 @@ def main(args):
 		cluster_labels = []
 		for idx in indices:
 			cluster_labels.append(season_labels[idx])
-		# Calculate the most commone label
+		# Calculate the most common label
 		common_label = stats.mode(cluster_labels, keepdims=False)[0]
 		common_labels.append(common_label)
 
@@ -227,10 +227,26 @@ def main(args):
 	winner_idxs = list(set(winner_idxs))
 	winner_idxs.sort()
 
-	# creates the winners data and label sets based off of surv_data and surv_labels
-	winners_data, winners_labels = [0]*len(winner_idxs), [0]*len(winner_idxs)
-	for i in range(len(winner_idxs)):
-		winners_data[i], winners_labels[i] = surv_data[winner_idxs[i]], surv_labels[winner_idxs[i]]
+
+	# use the clusters created by k-means for some fun stuff (:
+	# fun stuff: check to see which of the professor's clusters has the most winners
+	profs_winners = []
+	
+	for clusters in prof_clusters:
+		# Find indices of data points in the current cluster
+		indices = np.where(cluster_assignments == clusters)[0]
+		possible_winners = np.intersect1d(indices, winner_idxs)
+
+		# in the case that the possible winner is not an actual winner we delete it 
+		# since we only check for last name there is the possibility that there could 
+		# be false winners
+		for win in possible_winners:
+			if surv_labels[win] != winners[season_labels[win]-1]:
+				np.delete(possible_winners, np.where(possible_winners == win))
+		profs_winners.append(len(np.intersect1d(indices, winner_idxs)))
+
+	#print(f'The professor who is most likely to win Survivor is {}')
+		
 
 	pdb.set_trace()
 
