@@ -227,6 +227,12 @@ def main(args):
 	winner_idxs = list(set(winner_idxs))
 	winner_idxs.sort()
 
+	# creates the winners data and label sets based off of surv_data and surv_labels
+	winners_data, winners_labels = [0]*len(winner_idxs), [0]*len(winner_idxs)
+	for i in range(len(winner_idxs)):
+		winners_data[i], winners_labels[i] = surv_data.T[winner_idxs[i]], surv_labels[winner_idxs[i]]
+	winners_data, winners_labels = np.array(winners_data), np.array(winners_labels)
+	#pdb.set_trace()
 
 	# use the clusters created by k-means for some fun stuff (:
 	# fun stuff: check to see which of the professor's clusters has the most winners
@@ -249,9 +255,21 @@ def main(args):
 	winning_profs = np.where(profs_winners == max(profs_winners))
 	print(f'The professor(s) who may be most likely to win Survivor: \n{np.array2string(prof_labels[winning_profs], separator=" | ")}')
 	
+	# find the mean winner face
+	mean_winner = np.mean(winners_data.T, axis=1)
+	pca = PCA(0.9)
+	pca.fit(winners_data)
+	mean_winner_pca = pca.inverse_transform(pca.transform([mean_winner]))
+     
+	#pdb.set_trace()
+	mean_winner_reshaped_PCA = mean_winner_pca.reshape((70,70))
 
-	# possibly do nearest neighbor to find the professor most likely to win
-	
+	# plotting the image
+	plt.rcdefaults()
+	plt.figure(figsize=(8,4))
+	plt.subplot(1,1,1)
+	plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
+	plt.show()
 
 	pdb.set_trace()
 
