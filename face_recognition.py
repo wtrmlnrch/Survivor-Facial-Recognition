@@ -40,7 +40,7 @@ from scipy import stats
 ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
 # AI3_FALL2024
 # FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'FloridaSouthernCS', 'csc4510-f24-hw1-schwartzinators', 'data')
+DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
 Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
@@ -55,6 +55,7 @@ parser.add_argument('--seasons', type=int, help='Set the number of suvivor seaso
 
 
 def main(args):
+	global THRESHOLD, NUM_SEASONS, HEIGHT, WIDTH 
      
 	if args.debug:
 		pdb.set_trace()
@@ -78,7 +79,7 @@ def main(args):
 	
 	# Determine the mean face of the data set
 	mean_face = np.mean(surv_data, axis=1)
-
+	pdb.set_trace()
 	# Set the PCA to hold a 90% variance threshold
 	pca = PCA(THRESHOLD)
 
