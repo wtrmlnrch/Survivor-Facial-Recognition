@@ -17,7 +17,6 @@ analysis (PCA) and k-means clustering along with supervised learning methods suc
 and neural networks to explore an image dataset related to the reality TV show _Survivor_.
 
 """
-# raghr
 
 import argparse
 import os
@@ -46,14 +45,20 @@ Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
 Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
 WIDTH = 70
+THRESHOLD = 0.9
 
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
+parser.add_argument('--threshold', type=int, help='Set value for variance thrshold for PCA')
+
 
 def main(args):
      
 	if args.debug:
 		pdb.set_trace()
+
+	if args.threshold:
+		THRESHOLD = args.threshold
           
 	#Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
@@ -66,14 +71,20 @@ def main(args):
 	season_labels = np.char.replace(season_labels, 'S', '')
 	season_labels = season_labels.astype(int)
 	
+	# Determine the mean face of the data set
 	mean_face = np.mean(surv_data, axis=1)
-	pca = PCA(0.9)
-	surve_proj = pca.fit(surv_data.T)
-	mean_face_pca = pca.inverse_transform(pca.transform([mean_face]))
-     
-	#pdb.set_trace()
-	mean_image_reshaped_PCA = mean_face_pca.reshape((70,70))
 
+	# Set the PCA to hold a 90% variance threshold
+	pca = PCA(THRESHOLD)
+
+	# Fit the made PCA to our survivor data transposed
+	pca.fit(surv_data.T)
+
+	# Utilize the new pca and the averagesurvivor face to ccollect the average suvivor faced in the PCA face space
+	mean_face_pca = pca.inverse_transform(pca.transform([mean_face]))
+	mean_image_reshaped_PCA = mean_face_pca.reshape((HEIGHT,WIDTH))
+
+	# Visualize mean face
 	plt.figure(figsize=(8,4))
 	plt.subplot(1,1,1)
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
@@ -84,47 +95,47 @@ def main(args):
 	# number of principal components from (1), then compute the Euclidean distance from the
     # reconstructed face to the original. Largest distance indicates least likely to be a "face".
           
-	# Reconstruct each professor's face
-	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)) #.reshape(5,70,70)
-	#pdb.set_trace()
+	# Reconstruct each professor's face into the face space
+	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)) 
      
-	# montage code
-	montage_profs = reconstructed_faces.reshape(5,70,70)
-	prof_montage = montage(montage_profs, grid_shape=(1,5))
+	# Visualize each professor now in their reduced form
+	montage_profs = reconstructed_faces.reshape(len(prof_labels),HEIGHT,WIDTH)
+	prof_montage = montage(montage_profs, grid_shape=(1,len(prof_labels)))
 	plt.imshow(prof_montage, cmap='gray')
 	plt.axis('off')
 	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
 	plt.show()
-	#pdb.set_trace()
           
+	# Calculate the distance of the professors in their reduced form from their original form
 	distances = np.linalg.norm(prof_data.T - reconstructed_faces, axis=1)
 
-	# Find the professor with the largest distance
+	# Find the professor with the largest distance from its reduced self
 	least_face_index = np.argmax(distances)
 	least_face_distance = distances[least_face_index]
 
+	# Print out the result
 	print(f"Professor {prof_labels[least_face_index]} looks least like a survivor contestant. Distance: {least_face_distance}")
 
 	# 3. _Which professor is most likely to be the next host of Survivor?_ 
 	# To answer this question, project each professor into the reduced "Survivor face space"
 	# and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
-     
-	#Make NN only used with on Jeff Probst vector and Professor images
+
     # Project each professor into the reduced "Survivor face space"
 	prof_data_pca = pca.transform(prof_data.T)
 
-	# Assuming we know Jeff Probst's index, find his PCA vector
+	# Find the jeff probst image data and project him into the survivor face space
 	jeff_idx = np.where(surv_labels == 'Probst')[0][0]  # Replace with actual label
 	jeff_pca = pca.transform(surv_data[:, jeff_idx].reshape(1, -1))
 
-	# Apply Nearest Neighbor classification
+	# Use Nearest Neighbors and fit it to the professor specific pca
 	nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree')
 	nn.fit(prof_data_pca)
-	distances, spots = nn.kneighbors(jeff_pca)
+
+	# Determine the distance of each professor in the face space from jeff probst
+	distances, idc = nn.kneighbors(jeff_pca)
 
 	# Find and print the most similar professor
-	jeff_professor_idx = spots[0][0]
-	print(spots)
+	jeff_professor_idx = idc[0][0]
 	print(f"The professor with the highest chance of hosting survivor is: {prof_labels[jeff_professor_idx]}")
 	print(f"Distance to Jeff: {distances[0][0]}")
      
@@ -133,46 +144,49 @@ def main(args):
 	# **k-means clustering** on the PCA-reduced _Survivor_ faces, then assign each of the PCA-reduced 
 	# professor faces to the nearest cluster. The average season of _Survivor_ castaways in the cluster
 	#  (not including Jeff Probst) is the assigned season for that professor.
-     
+    
+	# Fit the pca to survivor data
 	surv_pca = pca.fit_transform(surv_data.T).T 
-	# Number of clusters 
+
+	# Use sume squared error to determine the best number of clusters for the dataset
 	sse = [] #SUM OF SQUARED ERROR
-	for k in range(1,46):
+	for k in range(1, len(surv_labels)):
 		km = KMeans(n_clusters=k, random_state=2)
 		km.fit(surv_pca.T)
 		sse.append(km.inertia_)
       
+	# Visualize each number of K along with its associated SSE
 	sns.set_style("whitegrid")
 	g=sns.lineplot(x=range(1,46), y=sse)
 
-	g.set(xlabel ="Number of cluster (k)", 
+	g.set(xlabel ="Number of K clusters", 
 		ylabel = "Sum Squared Error", 
 		title ='Elbow Method')
 	plt.show()
 
+	# Get the slope of each k clusters to determine which number of k is most linear
 	slopes = np.gradient(sse)
 	dis_to_one = np.subtract(slopes, -1)
 	most_linear = np.max(dis_to_one)
 	n_clusters = np.where(dis_to_one == most_linear)[0].tolist()[0]
 
 
-	# Apply k-means clustering
+	# Using found optimal number of clusters apply k-means clustering to survivor pca
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
 	kmeans.fit(surv_pca.T) 
 
-	# Get cluster labels for each image
+	# Get assigned cluster labels for each image
 	cluster_labels = kmeans.labels_
      
-	"""Visualize clustering results."""
+	# Visualize the cluster
 	plt.figure(figsize=(10, 7))
-
-	# Scatter plot
 	plt.scatter(surv_pca[0, :], surv_pca[1, :], c=cluster_labels, cmap='viridis', alpha=0.5)
 	plt.colorbar(label='Cluster Label')
 	plt.xlabel('PC 1')
 	plt.ylabel('PC 2')
 	plt.title('Reduced Data Clustering of survivor seasons')
 	plt.show()
+
 	# Project professor data into the PCA space
 	prof_pca = pca.transform(prof_data.T)
 
@@ -189,19 +203,21 @@ def main(args):
 		# Find indices of data points in the current cluster
 		indices = np.where(cluster_assignments == clusters)[0]
 		
-		# Extract labels of data points in the current cluster
+		# Extract season labels of data points in the current cluster
 		cluster_labels = []
 		for idx in indices:
 			cluster_labels.append(season_labels[idx])
-		# Calculate the most common label
+
+		# Calculate the most common season label
 		common_label = stats.mode(cluster_labels, keepdims=False)[0]
 		common_labels.append(common_label)
 
-    # Print professor assignments to clusters
+    # Print professor assignments to seasons/clusters
 	print("Professor assignments to clusters/seasons:")
 	for i, label in enumerate(prof_clusters):
 		print(f"Professor {prof_labels[i]} is closest to Season {common_labels[i]}.")
             
+
 	# 5. Which professor is most likely to win Survivor? Be creative! You must justify your answer 
 	# to this question in a quantitative way using the results of PCA on the Survivor dataset.
 
@@ -215,9 +231,10 @@ def main(args):
 	"Holland", 'Wilson', 'Underwood', 'Sheehan', "Vlachos",
 	"Casupanan", "Oketch", "Gabler", "Arocho", "Valladares", "Petty"]
 
+	# Find winners indexes
 	winner_idxs = []
 
-	# winners indexes
+	# Aprraoch Drawbacks:
 	# doesn't check for possible wrong winners
 	# however removes duplicate indexes of winners
 	for name in winners:
@@ -232,7 +249,6 @@ def main(args):
 	for i in range(len(winner_idxs)):
 		winners_data[i], winners_labels[i] = surv_data.T[winner_idxs[i]], surv_labels[winner_idxs[i]]
 	winners_data, winners_labels = np.array(winners_data), np.array(winners_labels)
-	#pdb.set_trace()
 
 	# use the clusters created by k-means for some fun stuff (:
 	# fun stuff: check to see which of the professor's clusters has the most winners
@@ -264,7 +280,7 @@ def main(args):
 		mean_winner_pca = pca.inverse_transform(pca.transform([mean_winner]))
 		
 		#pdb.set_trace()
-		mean_winner_reshaped_PCA = mean_winner_pca.reshape((70,70))
+		mean_winner_reshaped_PCA = mean_winner_pca.reshape((HEIGHT,WIDTH))
 
 		# plotting the image
 		plt.rcdefaults()
@@ -282,11 +298,9 @@ def main(args):
 		prof_winner_idx = np.where(distances == min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]))[0][0]
 		print(f"The professor who is most likely to win Survivor based on the closest Euclidean distance between their face \nand the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
 
-	pdb.set_trace()
 
 
-
-
+# Function to load and process the image data
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
     files = os.listdir(directory)  # extract filenames
