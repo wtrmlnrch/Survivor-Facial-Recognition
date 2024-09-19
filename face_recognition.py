@@ -46,10 +46,12 @@ Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
 HEIGHT = 70
 WIDTH = 70
 THRESHOLD = 0.9
+NUM_SEASONS = 46
 
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
 parser.add_argument('--threshold', type=int, help='Set value for variance thrshold for PCA')
+parser.add_argument('--seasons', type=int, help='Set the number of suvivor seasons used in the dataset')
 
 
 def main(args):
@@ -59,6 +61,9 @@ def main(args):
 
 	if args.threshold:
 		THRESHOLD = args.threshold
+	
+	if args.seasons:
+		NUM_SEASONS = args.seasons
           
 	#Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
@@ -150,7 +155,7 @@ def main(args):
 
 	# Use sume squared error to determine the best number of clusters for the dataset
 	sse = [] #SUM OF SQUARED ERROR
-	for k in range(1, len(surv_labels)):
+	for k in range(1, NUM_SEASONS):
 		km = KMeans(n_clusters=k, random_state=2)
 		km.fit(surv_pca.T)
 		sse.append(km.inertia_)
