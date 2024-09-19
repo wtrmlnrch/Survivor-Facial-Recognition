@@ -192,8 +192,6 @@ def main(args):
 	plt.title('Reduced Data Clustering of survivor seasons')
 	plt.show()
 
-	# Project professor data into the PCA space
-	prof_pca = pca.transform(prof_data.T)
 
     # Predict clusters for professors
 	prof_clusters = kmeans.predict(prof_data_pca)
