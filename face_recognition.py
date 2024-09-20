@@ -70,6 +70,9 @@ def main(args):
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
 	#  [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
 	# in the scikit-learn library.
+	print("\n\n*****************************************************")
+	print("           Step 1: Reduce Survivor Data              ")
+	print("*****************************************************\n")
      
 	# load data from a directory 
 	prof_data, prof_labels, prof_names= load(Prof_DataDir)
@@ -79,7 +82,7 @@ def main(args):
 	
 	# Determine the mean face of the data set
 	mean_face = np.mean(surv_data, axis=1)
-	pdb.set_trace()
+	
 	# Set the PCA to hold a 90% variance threshold
 	pca = PCA(THRESHOLD)
 
@@ -100,6 +103,9 @@ def main(args):
 	# Survivor dataset?_ To answer this question, reconstruct each professor's face using the limited 
 	# number of principal components from (1), then compute the Euclidean distance from the
     # reconstructed face to the original. Largest distance indicates least likely to be a "face".
+	print("\n\n*****************************************************")
+	print("Step 2: Determine Which Professor is Least Like a Face")
+	print("*****************************************************\n")
           
 	# Reconstruct each professor's face into the face space
 	reconstructed_faces = pca.inverse_transform(pca.transform(prof_data.T)) 
@@ -125,6 +131,9 @@ def main(args):
 	# 3. _Which professor is most likely to be the next host of Survivor?_ 
 	# To answer this question, project each professor into the reduced "Survivor face space"
 	# and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
+	print("\n\n*****************************************************")
+	print("    Step 3: Which Professor is Most Like the Host    ")
+	print("*****************************************************\n")
 
     # Project each professor into the reduced "Survivor face space"
 	prof_data_pca = pca.transform(prof_data.T)
@@ -150,6 +159,9 @@ def main(args):
 	# **k-means clustering** on the PCA-reduced _Survivor_ faces, then assign each of the PCA-reduced 
 	# professor faces to the nearest cluster. The average season of _Survivor_ castaways in the cluster
 	#  (not including Jeff Probst) is the assigned season for that professor.
+	print("\n\n*****************************************************")
+	print("          Step 4: Predict Professor Seasons          ")
+	print("*****************************************************\n")
     
 	# Fit the pca to survivor data
 	surv_pca = pca.fit_transform(surv_data.T).T 
@@ -224,6 +236,9 @@ def main(args):
 
 	# 5. Which professor is most likely to win Survivor? Be creative! You must justify your answer 
 	# to this question in a quantitative way using the results of PCA on the Survivor dataset.
+	print("\n\n*****************************************************")
+	print("               Step 5: Who Will Win                  ")
+	print("*****************************************************\n")
 
 	# all the winners of survivor
 	winners = ['Hatch', 'Wesson', 'Zohn', 'Towery', "Heidik", "Morasca", 
