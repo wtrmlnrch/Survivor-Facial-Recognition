@@ -66,15 +66,15 @@ def main(args):
 	if args.seasons:
 		NUM_SEASONS = args.seasons
           
-	#Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
+	# 1. Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
-	#  [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
+	# [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
 	# in the scikit-learn library.
 	print("\n\n*****************************************************")
 	print("           Step 1: Reduce Survivor Data              ")
 	print("*****************************************************\n")
      
-	# load data from a directory 
+	# Load data from a directory 
 	prof_data, prof_labels, prof_names= load(Prof_DataDir)
 	surv_data, surv_labels, season_labels = load(Surv_DataDir)
 	season_labels = np.char.replace(season_labels, 'S', '')
@@ -128,7 +128,7 @@ def main(args):
 	# Print out the result
 	print(f"Professor {prof_labels[least_face_index]} looks least like a survivor contestant. Distance: {least_face_distance}")
 
-	# 3. _Which professor is most likely to be the next host of Survivor?_ 
+	# 3. Which professor is most likely to be the next host of Survivor?_ 
 	# To answer this question, project each professor into the reduced "Survivor face space"
 	# and apply **nearest neighbor** classification to see who looks most similar to Jeff Probst.
 	print("\n\n*****************************************************")
@@ -155,10 +155,10 @@ def main(args):
 	print(f"Distance to Jeff: {distances[0][0]}")
      
 
-	#4. _Which season would each professor most likely be on?_ To answer this question, use 
+	# 4. Which season would each professor most likely be on?_ To answer this question, use 
 	# **k-means clustering** on the PCA-reduced _Survivor_ faces, then assign each of the PCA-reduced 
 	# professor faces to the nearest cluster. The average season of _Survivor_ castaways in the cluster
-	#  (not including Jeff Probst) is the assigned season for that professor.
+	# (not including Jeff Probst) is the assigned season for that professor.
 	print("\n\n*****************************************************")
 	print("          Step 4: Predict Professor Seasons          ")
 	print("*****************************************************\n")
@@ -240,7 +240,7 @@ def main(args):
 	print("               Step 5: Who Will Win                  ")
 	print("*****************************************************\n")
 
-	# all the winners of survivor
+	# All the winners of survivor
 	winners = ['Hatch', 'Wesson', 'Zohn', 'Towery', "Heidik", "Morasca", 
 	"Diaz-Twine", "Brkich", "Daugherty", "Westman", "Boatwright", 
 	"Baskauskas", "Kwon", "Cole", "Herzog", "Shallow", "Crowley", 
@@ -254,8 +254,8 @@ def main(args):
 	winner_idxs = []
 
 	# Aprraoch Drawbacks:
-	# doesn't check for possible wrong winners
-	# however removes duplicate indexes of winners
+	#  - doesn't check for possible wrong winners
+	#  - however removes duplicate indexes of winners
 	for name in winners:
 		idxs = np.where(surv_labels == name)
 		for ids in idxs[0]:
@@ -263,14 +263,14 @@ def main(args):
 	winner_idxs = list(set(winner_idxs))
 	winner_idxs.sort()
 
-	# creates the winners data and label sets based off of surv_data and surv_labels
+	# Creates the winners data and label sets based off of surv_data and surv_labels
 	winners_data, winners_labels = [0]*len(winner_idxs), [0]*len(winner_idxs)
 	for i in range(len(winner_idxs)):
 		winners_data[i], winners_labels[i] = surv_data.T[winner_idxs[i]], surv_labels[winner_idxs[i]]
 	winners_data, winners_labels = np.array(winners_data), np.array(winners_labels)
 
-	# use the clusters created by k-means for some fun stuff (:
-	# fun stuff: check to see which of the professor's clusters has the most winners
+	# Use the clusters created by k-means for some fun stuff (:
+	#  - fun stuff: check to see which of the professor's clusters has the most winners
 	profs_winners = []
 	
 	for clusters in prof_clusters:
@@ -278,7 +278,7 @@ def main(args):
 		indices = np.where(cluster_assignments == clusters)[0]
 		possible_winners = np.intersect1d(indices, winner_idxs)
 
-		# in the case that the possible winner is not an actual winner we delete it 
+		#In the case that the possible winner is not an actual winner we delete it 
 		# since we only check for last name there is the possibility that there could 
 		# be false winners
 		for win in possible_winners:
@@ -286,34 +286,32 @@ def main(args):
 				np.delete(possible_winners, np.where(possible_winners == win))
 		profs_winners.append(len(np.intersect1d(indices, winner_idxs)))
 	
-	# gets the possible multiple professors who may be the winner
+	# Gets the possible multiple professors who may be the winner
 	profs_winners = np.array(profs_winners)
 	winning_profs = np.where(profs_winners == max(profs_winners))
 	print(f'The professor(s) who may be most likely to win Survivor: \n{np.array2string(prof_labels[winning_profs], separator=" | ")}')
 	
 	if len(winning_profs[0]) > 1:
-		# find the mean winner face
+		# Find the mean winner face
 		mean_winner = np.mean(winners_data.T, axis=1)
 		pca = PCA(0.9)
 		pca.fit(winners_data)
 		mean_winner_pca = pca.inverse_transform(pca.transform([mean_winner]))
-		
-		#pdb.set_trace()
 		mean_winner_reshaped_PCA = mean_winner_pca.reshape((HEIGHT,WIDTH))
 
-		# plotting the image
+		# Plotting the image
 		plt.rcdefaults()
 		plt.figure(figsize=(8,4))
 		plt.subplot(1,1,1)
 		plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
 		plt.show()
 
-		# calculate the euclidean distances between each professors face and the mean winners face
+		# Calculate the euclidean distances between each professors face and the mean winners face
 		distances = []
 		for prof in prof_data.T:
 			distances.append(np.linalg.norm(mean_winner - prof))
 
-		# get the least out of our two already winning professors to find the one closest to the mean winners face
+		# Get the least out of our two already winning professors to find the one closest to the mean winners face
 		prof_winner_idx = np.where(distances == min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]))[0][0]
 		print(f"The professor who is most likely to win Survivor based on the closest Euclidean distance between their face \nand the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
 
@@ -322,9 +320,9 @@ def main(args):
 # Function to load and process the image data
 def load(directory=DATADIR):
     '''Load data (and labels) from directory.'''
-    files = os.listdir(directory)  # extract filenames
+    files = os.listdir(directory)  # Extract filenames
     files = [f for f in files if os.path.isfile(os.path.join(directory, f))]  # Ensure we only process files
-    n = len(files)  # number of files
+    n = len(files)  
 
     if n == 0:
         print("No files found in the directory.")
