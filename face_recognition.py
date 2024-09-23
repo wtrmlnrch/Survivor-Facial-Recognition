@@ -37,34 +37,54 @@ from sklearn.cluster import KMeans
 import seaborn as sns
 from scipy import stats
 
-ROOT = os.path.dirname(os.path.abspath(__file__)) # the path to this directory
-# AI3_FALL2024
-# FloridaSouthernCS
-DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'AI3_FALL2024', 'csc4510-f24-hw1-schwartzinators', 'data')
-Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'data', 'professors')
-Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'data','survivor')
-HEIGHT = 70
-WIDTH = 70
-THRESHOLD = 0.9
-NUM_SEASONS = 46
-
+# Parser arguments to allow the user to modify constant variables in the code
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
 parser.add_argument('--threshold', type=int, help='Set value for variance thrshold for PCA')
 parser.add_argument('--seasons', type=int, help='Set the number of suvivor seasons used in the dataset')
+parser.add_argument('--directory', type=str, help='Set your custom data director ex: C:\\Users\\cathe\\OneDrive\\Desktop\\AI3_Fall2024\\csc4510-f24-hw1-schwartzinators\\data\\')
+parser.add_argument('--height', type=int, help='Set value for height of images')
+parser.add_argument('--width', type=int, help='Set value for width images')
+
 
 
 def main(args):
-	global THRESHOLD, NUM_SEASONS, HEIGHT, WIDTH 
-     
+
+	# Set the data paths
+	ROOT = os.path.dirname(os.path.abspath(__file__)) 
+	DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'data')
+
+	if args.directory:
+			DATADIR = args.directory
+
+	Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'professors')
+	Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'survivor')
+
+	# Set our constant metrics  
 	if args.debug:
 		pdb.set_trace()
 
 	if args.threshold:
 		THRESHOLD = args.threshold
-	
+	else: 
+		THRESHOLD = 0.9
+
 	if args.seasons:
 		NUM_SEASONS = args.seasons
+	else:
+		NUM_SEASONS = 46
+
+	if args.height:
+		HEIGHT = args.height
+	else:
+		HEIGHT = 70
+	
+	if args.width:
+		WIDTH = args.width
+	else:
+		WIDTH = 70
+	
+
           
 	# 1. Apply **PCA** to the _Survivor_ faces dataset in order to reduce dimensionality 
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
@@ -75,8 +95,8 @@ def main(args):
 	print("*****************************************************\n")
      
 	# Load data from a directory 
-	prof_data, prof_labels, prof_names= load(Prof_DataDir)
-	surv_data, surv_labels, season_labels = load(Surv_DataDir)
+	prof_data, prof_labels, prof_names= load(Prof_DataDir, HEIGHT, WIDTH)
+	surv_data, surv_labels, season_labels = load(Surv_DataDir, HEIGHT, WIDTH)
 	season_labels = np.char.replace(season_labels, 'S', '')
 	season_labels = season_labels.astype(int)
 	
@@ -318,7 +338,7 @@ def main(args):
 
 
 # Function to load and process the image data
-def load(directory=DATADIR):
+def load(directory= os.path.dirname(os.path.abspath(__file__)), HEIGHT = 70, WIDTH = 70):
     '''Load data (and labels) from directory.'''
     files = os.listdir(directory)  # Extract filenames
     files = [f for f in files if os.path.isfile(os.path.join(directory, f))]  # Ensure we only process files
