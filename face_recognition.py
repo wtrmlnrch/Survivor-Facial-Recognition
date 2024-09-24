@@ -40,11 +40,11 @@ from scipy import stats
 # Parser arguments to allow the user to modify constant variables in the code
 parser = argparse.ArgumentParser(description="Apply unsupervised learning methods to the problem of face recognition")
 parser.add_argument('--debug', help='use pdb to look into code before exiting program', action='store_true')
-parser.add_argument('--threshold', type=int, help='Set value for variance thrshold for PCA')
-parser.add_argument('--seasons', type=int, help='Set the number of suvivor seasons used in the dataset')
+parser.add_argument('--threshold', type=float, default=.90, help='Set value for variance thrshold for PCA')
+parser.add_argument('--seasons', type=int, default=46, help='Set the number of suvivor seasons used in the dataset')
 parser.add_argument('--directory', type=str, help='Set your custom data director ex: C:\\Users\\cathe\\OneDrive\\Desktop\\AI3_Fall2024\\csc4510-f24-hw1-schwartzinators\\data\\')
-parser.add_argument('--height', type=int, help='Set value for height of images')
-parser.add_argument('--width', type=int, help='Set value for width images')
+parser.add_argument('--height', type=int, default=70, help='Set value for height of images')
+parser.add_argument('--width', type=int, default=70, help='Set value for width images')
 
 
 
@@ -55,34 +55,16 @@ def main(args):
 	DATADIR = os.path.join(os.path.dirname(os.path.dirname(ROOT)), 'data')
 
 	if args.directory:
-			DATADIR = args.directory
+		DATADIR = args.directory
 
 	Prof_DataDir = os.path.join(os.path.dirname(DATADIR), 'professors')
 	Surv_DataDir = os.path.join(os.path.dirname(DATADIR), 'survivor')
 
-	# Set our constant metrics  
-	if args.debug:
-		pdb.set_trace()
-
-	if args.threshold:
-		THRESHOLD = args.threshold
-	else: 
-		THRESHOLD = 0.9
-
-	if args.seasons:
-		NUM_SEASONS = args.seasons
-	else:
-		NUM_SEASONS = 46
-
-	if args.height:
-		HEIGHT = args.height
-	else:
-		HEIGHT = 70
-	
-	if args.width:
-		WIDTH = args.width
-	else:
-		WIDTH = 70
+	# Set our constant metrics 
+	THRESHOLD = args.threshold	
+	NUM_SEASONS = args.seasons
+	HEIGHT = args.height
+	WIDTH = args.width
 	
 
           
@@ -113,12 +95,21 @@ def main(args):
 	mean_face_pca = pca.inverse_transform(pca.transform([mean_face]))
 	mean_image_reshaped_PCA = mean_face_pca.reshape((HEIGHT,WIDTH))
 
+	n_components = pca.n_components_
+	variance_captured = np.sum(pca.explained_variance_ratio_)
+
 	# Visualize mean face
-	plt.figure(figsize=(8,4))
-	plt.subplot(1,1,1)
+	plt.figure(figsize=(8, 4))
+	plt.subplot(1, 1, 1)
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
+	plt.title("Mean Survivor Face in PCA Space")
+	plt.axis('off')  
+
 	plt.show()
-     
+
+	print(f"The PCA uses {n_components} hitting a {variance_captured} varaince captured to match with the desired {THRESHOLD} thresold")
+
+	
 	# 2. Which professor looks least like a face according to the underlying facial features in the 
 	# Survivor dataset?_ To answer this question, reconstruct each professor's face using the limited 
 	# number of principal components from (1), then compute the Euclidean distance from the
@@ -207,8 +198,8 @@ def main(args):
 	dis_to_one = np.subtract(slopes, -1)
 	most_linear = np.max(dis_to_one)
 	n_clusters = np.where(dis_to_one == most_linear)[0].tolist()[0]
-
-
+	
+	print(f"Given the most_linear distance of {most_linear}, {n_clusters} will be used for the k-means calculations.")
 	# Using found optimal number of clusters apply k-means clustering to survivor pca
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
 	kmeans.fit(surv_pca.T) 
@@ -225,7 +216,6 @@ def main(args):
 	plt.title('Reduced Data Clustering of survivor seasons')
 	plt.show()
 
-
     # Predict clusters for professors
 	prof_clusters = kmeans.predict(prof_data_pca)
     
@@ -233,20 +223,44 @@ def main(args):
 	cluster_assignments = kmeans.labels_
 
 	# Initialize list to store average labels for each cluster
+	# Initialize list to store average labels for each cluster
 	common_labels = []
-      
-	for clusters in prof_clusters:
+	num_clusters = len(prof_clusters)  # Assuming prof_clusters holds the cluster information
+	fig, axes = plt.subplots(num_clusters, 1, figsize=(8, num_clusters * 2))
+
+	for cluster_idx, cluster in enumerate(prof_clusters):  # Use enumerate to get the index
 		# Find indices of data points in the current cluster
-		indices = np.where(cluster_assignments == clusters)[0]
-		
+		indices = np.where(cluster_assignments == cluster)[0]
+
+		# List to show the faces of the cluster
+		image_in_cluster = []
+
 		# Extract season labels of data points in the current cluster
 		cluster_labels = []
+		
 		for idx in indices:
+			face_image = surv_data.T[idx].reshape((HEIGHT, WIDTH))  # Ensure this reshape works
+			image_in_cluster.append(face_image)
 			cluster_labels.append(season_labels[idx])
 
 		# Calculate the most common season label
 		common_label = stats.mode(cluster_labels, keepdims=False)[0]
 		common_labels.append(common_label)
+
+		# Create a montage layout
+		cluster_montage = np.zeros((HEIGHT, WIDTH * len(image_in_cluster)))  # Adjust for montage layout
+		for i, img in enumerate(image_in_cluster):
+			cluster_montage[:, i * WIDTH:(i + 1) * WIDTH] = img  # Fill the montage
+
+		# Display the montage for the current cluster
+		axes[cluster_idx].imshow(cluster_montage, cmap='gray')  # Use cluster_idx
+		axes[cluster_idx].axis('off')  # Turn off axis
+		axes[cluster_idx].set_title(f"Cluster {cluster}")  # Set the cluster title
+
+	plt.tight_layout()
+	plt.title("Professors Clusters Grouped Together")
+	plt.axis('off')
+	plt.show()
 
     # Print professor assignments to seasons/clusters
 	print("Professor assignments to clusters/seasons:")
@@ -324,6 +338,8 @@ def main(args):
 		plt.figure(figsize=(8,4))
 		plt.subplot(1,1,1)
 		plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
+		plt.title("Mean Winner Face in PCA Space")
+		plt.axis('off')
 		plt.show()
 
 		# Calculate the euclidean distances between each professors face and the mean winners face
@@ -335,6 +351,8 @@ def main(args):
 		prof_winner_idx = np.where(distances == min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]))[0][0]
 		print(f"The professor who is most likely to win Survivor based on the closest Euclidean distance between their face \nand the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
 
+	if args.debug:
+		pdb.set_trace()
 
 
 # Function to load and process the image data
