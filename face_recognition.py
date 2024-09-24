@@ -261,7 +261,7 @@ def main(args):
 		axes[cluster_idx].set_title(f"Cluster {cluster}/ Professor {prof_labels[cluster_idx]}")  # Set the cluster title
 
 	plt.tight_layout()
-	plt.title("Professors' Clusters Grouped Together")
+	#plt.title("Professors' Clusters Grouped Together")
 	plt.axis('off')
 	plt.gcf().canvas.manager.set_window_title("Figure 5: Professors' Clusters")
 	plt.show()
