@@ -99,7 +99,7 @@ def main(args):
 	variance_captured = np.sum(pca.explained_variance_ratio_)
 
 	# Visualize mean face
-	plt.figure(figsize=(8, 4))
+	plt.figure("Figure 1: Mean Survivor Face", figsize=(8, 4))
 	plt.subplot(1, 1, 1)
 	plt.imshow(mean_image_reshaped_PCA, cmap='gray')
 	plt.title("Mean Survivor Face in PCA Space")
@@ -124,6 +124,7 @@ def main(args):
 	# Visualize each professor now in their reduced form
 	montage_profs = reconstructed_faces.reshape(len(prof_labels),HEIGHT,WIDTH)
 	prof_montage = montage(montage_profs, grid_shape=(1,len(prof_labels)))
+	plt.figure("Figure 2: Reconstructed Faces Montage")
 	plt.imshow(prof_montage, cmap='gray')
 	plt.axis('off')
 	plt.title('Roberson | Ngo | Cazalas | Burke | Eicholtz')
@@ -191,6 +192,7 @@ def main(args):
 	g.set(xlabel ="Number of K clusters", 
 		ylabel = "Sum Squared Error", 
 		title ='Elbow Method')
+	plt.gcf().canvas.manager.set_window_title("Figure 3: Elbow Method")
 	plt.show()
 
 	# Get the slope of each k clusters to determine which number of k is most linear
@@ -208,7 +210,7 @@ def main(args):
 	cluster_labels = kmeans.labels_
      
 	# Visualize the cluster
-	plt.figure(figsize=(10, 7))
+	plt.figure("Figure 4: Clusters of Survivor Seasons", figsize=(10, 7))
 	plt.scatter(surv_pca[0, :], surv_pca[1, :], c=cluster_labels, cmap='viridis', alpha=0.5)
 	plt.colorbar(label='Cluster Label')
 	plt.xlabel('PC 1')
@@ -258,8 +260,9 @@ def main(args):
 		axes[cluster_idx].set_title(f"Cluster {cluster}")  # Set the cluster title
 
 	plt.tight_layout()
-	plt.title("Professors Clusters Grouped Together")
+	plt.title("Professors' Clusters Grouped Together")
 	plt.axis('off')
+	plt.gcf().canvas.manager.set_window_title("Figure 5: Professors' Clusters")
 	plt.show()
 
     # Print professor assignments to seasons/clusters
@@ -287,7 +290,7 @@ def main(args):
 	# Find winners indexes
 	winner_idxs = []
 
-	# Aprraoch Drawbacks:
+	# Approach Drawbacks:
 	#  - doesn't check for possible wrong winners
 	#  - however removes duplicate indexes of winners
 	for name in winners:
@@ -335,7 +338,7 @@ def main(args):
 
 		# Plotting the image
 		plt.rcdefaults()
-		plt.figure(figsize=(8,4))
+		plt.figure("Figure 6: Mean Winner Face", figsize=(8,4))
 		plt.subplot(1,1,1)
 		plt.imshow(mean_winner_reshaped_PCA, cmap='gray')
 		plt.title("Mean Winner Face in PCA Space")
