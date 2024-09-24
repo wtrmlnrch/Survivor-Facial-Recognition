@@ -72,9 +72,6 @@ def main(args):
 	# while maintaining at least 90% of the original variance. You are encouraged to use the
 	# [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) methods 
 	# in the scikit-learn library.
-	print("\n\n*****************************************************")
-	print("           Step 1: Reduce Survivor Data              ")
-	print("*****************************************************\n")
      
 	# Load data from a directory 
 	prof_data, prof_labels, prof_names= load(Prof_DataDir, HEIGHT, WIDTH)
@@ -82,6 +79,10 @@ def main(args):
 	season_labels = np.char.replace(season_labels, 'S', '')
 	season_labels = season_labels.astype(int)
 	
+	print("\n\n*****************************************************")
+	print("           Step 1: Reduce Survivor Data              ")
+	print("*****************************************************\n")
+
 	# Determine the mean face of the data set
 	mean_face = np.mean(surv_data, axis=1)
 	
@@ -107,7 +108,7 @@ def main(args):
 
 	plt.show()
 
-	print(f"The PCA uses {n_components} hitting a {variance_captured} varaince captured to match with the desired {THRESHOLD} thresold")
+	print(f"The PCA uses {n_components} principal components hitting a {(variance_captured*100):.4f}% variance captured to match with the desired {THRESHOLD} thresold.")
 
 	
 	# 2. Which professor looks least like a face according to the underlying facial features in the 
@@ -201,7 +202,7 @@ def main(args):
 	most_linear = np.max(dis_to_one)
 	n_clusters = np.where(dis_to_one == most_linear)[0].tolist()[0]
 	
-	print(f"Given the most_linear distance of {most_linear}, {n_clusters} will be used for the k-means calculations.")
+	print(f"Given the most linear distance of {most_linear}, {n_clusters} will be used for the k-means calculations.")
 	# Using found optimal number of clusters apply k-means clustering to survivor pca
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0)
 	kmeans.fit(surv_pca.T) 
@@ -352,7 +353,7 @@ def main(args):
 
 		# Get the least out of our two already winning professors to find the one closest to the mean winners face
 		prof_winner_idx = np.where(distances == min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]))[0][0]
-		print(f"The professor who is most likely to win Survivor based on the closest Euclidean distance between their face \nand the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
+		print(f"The professor who is most likely to win Survivor based on the closest Euclidean \ndistance ({min(distances[winning_profs[0][0]], distances[winning_profs[0][1]]):.4f}) between their face and the mean winner's face is: Dr. {prof_labels[prof_winner_idx]}!")
 
 	if args.debug:
 		pdb.set_trace()
