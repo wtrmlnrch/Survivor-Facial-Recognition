@@ -234,7 +234,7 @@ def main(args):
 	for cluster_idx, cluster in enumerate(prof_clusters):  # Use enumerate to get the index
 		# Find indices of data points in the current cluster
 		indices = np.where(cluster_assignments == cluster)[0]
-
+		pdb.set_trace()
 		# List to show the faces of the cluster
 		image_in_cluster = []
 
@@ -256,9 +256,9 @@ def main(args):
 			cluster_montage[:, i * WIDTH:(i + 1) * WIDTH] = img  # Fill the montage
 
 		# Display the montage for the current cluster
-		axes[cluster_idx].imshow(cluster_montage, cmap='gray')  # Use cluster_idx
+		axes[cluster_idx].imshow(cluster_montage, cmap='gray') # Use cluster_idx
 		axes[cluster_idx].axis('off')  # Turn off axis
-		axes[cluster_idx].set_title(f"Cluster {cluster}")  # Set the cluster title
+		axes[cluster_idx].set_title(f"Cluster {cluster}/ Professor {prof_labels[cluster_idx]}")  # Set the cluster title
 
 	plt.tight_layout()
 	plt.title("Professors' Clusters Grouped Together")
