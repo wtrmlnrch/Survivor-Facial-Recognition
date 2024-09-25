@@ -234,7 +234,7 @@ def main(args):
 	for cluster_idx, cluster in enumerate(prof_clusters):  # Use enumerate to get the index
 		# Find indices of data points in the current cluster
 		indices = np.where(cluster_assignments == cluster)[0]
-		pdb.set_trace()
+		
 		# List to show the faces of the cluster
 		image_in_cluster = []
 
